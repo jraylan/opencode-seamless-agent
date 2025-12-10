@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.7](https://github.com/jraylan/opencode-seamless-agent/compare/v0.0.6...v0.0.7) (2025-12-10)
+
+
+### Bug Fixes
+
+* Fix bun.lock ([892bb37](https://github.com/jraylan/opencode-seamless-agent/commit/892bb37f05b14534ffd91646d1c4c7569b29875a))
+* Solving Prompt automaticly being sent ([109a213](https://github.com/jraylan/opencode-seamless-agent/commit/109a213a9a9f3be7312be795e12f0f8e9d6b87e3))
+
 ## [0.0.6](https://github.com/jraylan/opencode-seamless-agent/compare/v0.0.5...v0.0.6) (2025-12-10)
 
 
