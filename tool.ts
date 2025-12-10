@@ -123,6 +123,12 @@ The tool will interactively prompt the user and wait for their response.
                             clearTimeout(timeout);
                             resolve(event.properties.text);
                             break;
+                        } else {
+                            this.client.tui.appendPrompt({
+                                body: {
+                                    text: JSON.stringify(event, null, 2)
+                                }
+                            })
                         }
                     }
                 } catch (error) {
