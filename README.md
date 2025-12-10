@@ -92,7 +92,7 @@ You can add this into your OpenCode instructions file or project configuration.
 
 When the IA Agent use this tool, the following should happen:
 
-1. A prompt appears in the OpenCode CLI console
+1. A Notification will appears in the OpenCode CLI console
 2. Type your response
 3. The agent continues based on your input
 
