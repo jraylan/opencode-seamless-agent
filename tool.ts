@@ -63,11 +63,11 @@ The tool will interactively prompt the user and wait for their response.
         }
     }
 
-    showNotification(requestId: string, title: string, question: string) {
+    showNotification(requestId: string, sessionId: string, title: string, question: string) {
         this.client.tui.showToast({
             body: {
                 title: title,
-                message: JSON.stringify(this.client.session.messages, null, 2),
+                message: JSON.stringify(this.client.session.messages({ path: { id: sessionId } }), null, 2),
                 variant: "warning",
                 duration: 5000,
             }
@@ -75,7 +75,7 @@ The tool will interactively prompt the user and wait for their response.
 
         setTimeout(() => {
             if (this.requests.has(requestId)) {
-                this.showNotification(requestId, title, question);
+                this.showNotification(requestId, sessionId, title, question);
             }
         }, 5000)
     }
@@ -93,6 +93,8 @@ The tool will interactively prompt the user and wait for their response.
 
         try {
 
+
+            this.showNotification(requestId, context.sessionID, args.title, args.question);
             // Subscribe to events
             const eventsResponse = await this.client.event.subscribe();
 
