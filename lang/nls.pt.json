@@ -1,4 +1,5 @@
 {
   "notification.confirmationRequired": "Confirmação Necessária",
-  "prompt.pleaseRespond": "Por favor, responda:"
+  "notification.requestAbortedTitle": "Requisição Abortada",
+  "notification.requestAbortedMessage": "A requisição foi abortada pelo usuário ou por um erro do sistema."
 }

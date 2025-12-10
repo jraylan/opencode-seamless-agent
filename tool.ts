@@ -3,6 +3,16 @@ import { z } from "zod"
 import i18n from "./i18n";
 
 
+const RESPONSE_SCHEMA = z.object({
+    responded: z.boolean().describe("Indicates whether the user provided a response."),
+    response: z.string().describe("The user's response to the question."),
+    error: z.string().optional().describe("An error message if something went wrong."),
+    // TODO
+    //attachments: z.array(z.object({
+    //    name: z.string().describe("The name of the attachment."),
+    //    uri: z.string().describe("The URI where the attachment can be accessed."),
+    //})).describe("A list of attachments provided by the user, if any."),
+})
 
 export class AskUserTool {
     public readonly args = {
@@ -23,6 +33,7 @@ The tool will interactively prompt the user and wait for their response.
 `
 
     private requests = new Map<string, { resolve: (value: string) => void, reject: (error: Error) => void }>();
+    private notifications = new Map<string, string | number | NodeJS.Timeout | undefined>();
 
     constructor(private client: PluginInput["client"], private $: PluginInput["$"]) { }
 
@@ -39,47 +50,103 @@ The tool will interactively prompt the user and wait for their response.
         return false; // No pending request for this session
     }
 
-    async execute(args: z.infer<z.ZodObject<AskUserTool["args"]>>, context: ToolContext): Promise<string> {
-        const requestId = `${context.sessionID}-${context.messageID}-${Date.now()}`;
+    clearRequest(requestId: string, wasAborted = false) {
+        this.requests.delete(requestId);
+        const interval = this.notifications.get(requestId);
+        if (interval) {
+            clearInterval(interval);
+            this.notifications.delete(requestId);
+        }
+        if (wasAborted) {
+            this.client.tui.showToast({
+                body: {
+                    title: i18n.requestAbortedTitle,
+                    message: i18n.requestAbortedMessage,
+                    variant: "error",
+                    duration: 5000,
+                }
+            });
+        }
+    }
 
-        // Show toast notification
+    showNotification(requestId: string, title: string, question: string) {
         this.client.tui.showToast({
             body: {
-                title: i18n.confirmationRequired,
-                message: args.title,
-                variant: "info",
+                title: title,
+                message: question,
+                variant: "warning",
                 duration: 5000,
             }
         });
+    }
 
-        // Create a promise that will be resolved when the user responds
-        const userResponsePromise = new Promise<string>((resolve, reject) => {
-            this.requests.set(requestId, { resolve, reject });
+    async execute(args: z.infer<z.ZodObject<AskUserTool["args"]>>, context: ToolContext): Promise<string> {
+        const requestId = `${context.sessionID}-${context.messageID}-${Date.now()}`;
 
-            // Handle abort signal
-            context.abort.addEventListener("abort", () => {
-                this.requests.delete(requestId);
-                reject(new Error("Request aborted"));
-            });
+        this.showNotification(requestId, args.title, args.question);
+
+        this.notifications.set(
+            requestId,
+            setInterval(this.showNotification, 5000, requestId, args.title, args.question)
+        );
+
+
+        // Handle abort signal
+        context.abort.addEventListener("abort", () => {
+            this.clearRequest(requestId, true);
         });
 
-        // Inject the question message into the chat (not the input area)
-        // Using session.prompt with noReply to display in chat without AI response
-        await this.client.session.prompt({
-            path: { id: context.sessionID },
-            body: {
-                noReply: true,
-                parts: [
-                    {
-                        type: "text",
-                        text: `**${args.title}**\n\n${args.question}\n\n> Please type your response below:`
-                    }
-                ]
+        // Track whether an error occurred
+        let error = true
+
+        try {
+            // Wait for user response via control API
+            const request = await this.client.tui.control.next();
+
+            if (request.error) {
+                return JSON.stringify(RESPONSE_SCHEMA.parse({
+                    responded: false,
+                    response: "",
+                    error: String(request.error),
+                }));
             }
-        });
 
-        return JSON.stringify({
-            "response": "Wait for the user's next input message to proceed."
-        })
+            let userResponse: string;
+            const data = (request as { data?: unknown }).data;
+            const response = (request as { response?: Response }).response;
+
+            if (typeof data === 'string') {
+                userResponse = data;
+            } else if (data && typeof data === 'object' && 'body' in data) {
+                userResponse = String((data as { body: unknown }).body) || "";
+            } else if (response) {
+                userResponse = await response.text();
+            } else {
+                userResponse = "";
+            }
+
+            const result = RESPONSE_SCHEMA.parse({
+                responded: !!userResponse,
+                response: userResponse || "",
+            });
+
+            error = false;
+            return JSON.stringify(result);
+        } catch (error) {
+            if (context.abort.aborted) {
+                return JSON.stringify(RESPONSE_SCHEMA.parse({
+                    responded: false,
+                    response: "",
+                    error: "Request aborted",
+                }));
+            }
+            return JSON.stringify(RESPONSE_SCHEMA.parse({
+                responded: false,
+                response: "",
+                error: String(error),
+            }));
+        } finally {
+            this.clearRequest(requestId, error);
+        }
     }
 }

@@ -1,4 +1,5 @@
 {
   "notification.confirmationRequired": "Confirmation Required",
-  "prompt.pleaseRespond": "Please respond:"
+  "notification.requestAbortedTitle": "Request Aborted",
+  "notification.requestAbortedMessage": "The request was aborted by the user or a system error."
 }
