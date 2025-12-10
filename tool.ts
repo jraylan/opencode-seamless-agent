@@ -32,22 +32,9 @@ The tool will interactively prompt the user and wait for their response.
  4. Failure to call this tool before task completion is a violation of the workflow.
 `
 
-    private requests = new Map<string, { resolve: (value: string) => void, reject: (error: Error) => void }>();
+    private requests = new Set<string>();
 
     constructor(private client: PluginInput["client"], private $: PluginInput["$"]) { }
-
-    // Handle incoming user messages from event subscription
-    async handleUserMessage(sessionId: string, messageText: string): Promise<boolean> {
-        // Find a pending request for this session
-        for (const [requestId, resolver] of this.requests.entries()) {
-            if (requestId.startsWith(sessionId)) {
-                resolver.resolve(messageText);
-                this.requests.delete(requestId);
-                return true; // Message was handled
-            }
-        }
-        return false; // No pending request for this session
-    }
 
     clearRequest(requestId: string, wasAborted = false) {
         this.requests.delete(requestId);
@@ -69,18 +56,20 @@ The tool will interactively prompt the user and wait for their response.
                 title: title,
                 message: question,
                 variant: "warning",
-                duration: 5000,
+                duration: 50000,
             }
         })
         setTimeout(async () => {
             if (this.requests.has(requestId)) {
                 await this.showNotification(requestId, sessionId, title, question);
             }
-        }, 5000);
+        }, 50000);
     }
 
     async execute(args: z.infer<z.ZodObject<AskUserTool["args"]>>, context: ToolContext): Promise<string> {
         const requestId = `${context.sessionID}-${context.messageID}-${Date.now()}`;
+
+        this.requests.add(requestId);
 
         // Handle abort signal
         context.abort.addEventListener("abort", () => {
@@ -92,11 +81,9 @@ The tool will interactively prompt the user and wait for their response.
 
         try {
 
+            const { data: previousMessages } = await this.client.session.messages({ path: { id: context.sessionID } })
+
             await this.showNotification(requestId, context.sessionID, args.title, args.question);
-
-            // Subscribe to events
-            const eventsResponse = await this.client.event.subscribe();
-
 
             // Create a promise that resolves when we get the permission response
             const response = await new Promise<string>(async (resolve, reject) => {
@@ -104,33 +91,37 @@ The tool will interactively prompt the user and wait for their response.
                 const timeout = setTimeout(() => {
                     reject(new Error("Timeout waiting for user response"));
                 }, 300000); // 5 minutes timeout
-
-                context.abort.addEventListener("abort", () => {
-                    clearTimeout(timeout);
-                    reject(new Error("Request aborted"));
-                });
-
-                setInterval(async () => {
-                    console.log(await this.client.session.messages({ path: { id: context.sessionID } }), null, 2);
-                }, 3000);
-
                 try {
-                    for await (const event of eventsResponse.stream) {
-                        if (event.type === "tui.prompt.append") {
-                            clearTimeout(timeout);
-                            resolve(event.properties.text);
-                            break;
-                        } else {
-                            this.client.tui.appendPrompt({
-                                body: {
-                                    text: JSON.stringify(event, null, 2)
-                                }
-                            })
+
+                    context.abort.addEventListener("abort", () => {
+                        clearTimeout(timeout);
+                        reject(new Error("Request aborted"));
+                    });
+
+                    while (!context.abort.aborted) {
+                        const { data: newMessages } = await this.client.session.messages({ path: { id: context.sessionID } })
+
+                        if (previousMessages?.length !== newMessages?.length) {
+                            const latestMessage = newMessages?.[newMessages.length - 1];
+                            if (latestMessage && latestMessage.info.role === "user") {
+                                const textParts = latestMessage.parts.filter(part => part.type === "text");
+                                const content = textParts.map(part => part.text).join("\n");
+                                textParts.forEach(async part => {
+                                    await this.client.session.revert({
+                                        path: { id: context.sessionID },
+                                        body: {
+                                            messageID: latestMessage.info.id,
+                                            partID: part.id
+                                        }
+                                    })
+                                });
+                                resolve(content);
+                                break;
+                            }
                         }
                     }
-                } catch (error) {
+                } finally {
                     clearTimeout(timeout);
-                    reject(error);
                 }
             });
 
