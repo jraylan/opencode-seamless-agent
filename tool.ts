@@ -33,7 +33,6 @@ The tool will interactively prompt the user and wait for their response.
 `
 
     private requests = new Map<string, { resolve: (value: string) => void, reject: (error: Error) => void }>();
-    private notifications = new Map<string, string | number | NodeJS.Timeout | undefined>();
 
     constructor(private client: PluginInput["client"], private $: PluginInput["$"]) { }
 
@@ -52,11 +51,6 @@ The tool will interactively prompt the user and wait for their response.
 
     clearRequest(requestId: string, wasAborted = false) {
         this.requests.delete(requestId);
-        const interval = this.notifications.get(requestId);
-        if (interval) {
-            clearInterval(interval);
-            this.notifications.delete(requestId);
-        }
         if (wasAborted) {
             this.client.tui.showToast({
                 body: {
@@ -73,23 +67,21 @@ The tool will interactively prompt the user and wait for their response.
         this.client.tui.showToast({
             body: {
                 title: title,
-                message: question,
+                message: JSON.stringify(this.client.session.messages, null, 2),
                 variant: "warning",
                 duration: 5000,
             }
         });
+
+        setTimeout(() => {
+            if (this.requests.has(requestId)) {
+                this.showNotification(requestId, title, question);
+            }
+        }, 5000)
     }
 
     async execute(args: z.infer<z.ZodObject<AskUserTool["args"]>>, context: ToolContext): Promise<string> {
         const requestId = `${context.sessionID}-${context.messageID}-${Date.now()}`;
-
-        this.showNotification(requestId, args.title, args.question);
-
-        this.notifications.set(
-            requestId,
-            setInterval(this.showNotification, 5000, requestId, args.title, args.question)
-        );
-
 
         // Handle abort signal
         context.abort.addEventListener("abort", () => {
