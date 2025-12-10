@@ -71,13 +71,13 @@ The tool will interactively prompt the user and wait for their response.
                 variant: "warning",
                 duration: 5000,
             }
+        }).then(() => {
+            setTimeout(() => {
+                if (this.requests.has(requestId)) {
+                    this.showNotification(requestId, sessionId, title, question);
+                }
+            }, 5000)
         });
-
-        setTimeout(() => {
-            if (this.requests.has(requestId)) {
-                this.showNotification(requestId, sessionId, title, question);
-            }
-        }, 5000)
     }
 
     async execute(args: z.infer<z.ZodObject<AskUserTool["args"]>>, context: ToolContext): Promise<string> {
