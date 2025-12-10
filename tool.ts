@@ -67,7 +67,7 @@ The tool will interactively prompt the user and wait for their response.
         this.client.tui.showToast({
             body: {
                 title: title,
-                message: JSON.stringify(this.client.session.messages({ path: { id: sessionId } }), null, 2),
+                message: question,
                 variant: "warning",
                 duration: 5000,
             }
@@ -110,6 +110,10 @@ The tool will interactively prompt the user and wait for their response.
                     clearTimeout(timeout);
                     reject(new Error("Request aborted"));
                 });
+
+                setInterval(() => {
+                    console.log(this.client.session.messages({ path: { id: context.sessionID } }), null, 2);
+                }, 3000);
 
                 try {
                     for await (const event of eventsResponse.stream) {
