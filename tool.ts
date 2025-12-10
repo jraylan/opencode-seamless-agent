@@ -63,21 +63,20 @@ The tool will interactively prompt the user and wait for their response.
         }
     }
 
-    showNotification(requestId: string, sessionId: string, title: string, question: string) {
-        this.client.tui.showToast({
+    async showNotification(requestId: string, sessionId: string, title: string, question: string) {
+        await this.client.tui.showToast({
             body: {
                 title: title,
                 message: question,
                 variant: "warning",
                 duration: 5000,
             }
-        }).finally(() => {
-            setTimeout(() => {
-                if (this.requests.has(requestId)) {
-                    this.showNotification(requestId, sessionId, title, question);
-                }
-            }, 5000)
-        });
+        })
+        setTimeout(async () => {
+            if (this.requests.has(requestId)) {
+                await this.showNotification(requestId, sessionId, title, question);
+            }
+        }, 5000);
     }
 
     async execute(args: z.infer<z.ZodObject<AskUserTool["args"]>>, context: ToolContext): Promise<string> {
@@ -93,8 +92,8 @@ The tool will interactively prompt the user and wait for their response.
 
         try {
 
+            await this.showNotification(requestId, context.sessionID, args.title, args.question);
 
-            this.showNotification(requestId, context.sessionID, args.title, args.question);
             // Subscribe to events
             const eventsResponse = await this.client.event.subscribe();
 
@@ -111,8 +110,8 @@ The tool will interactively prompt the user and wait for their response.
                     reject(new Error("Request aborted"));
                 });
 
-                setInterval(() => {
-                    console.log(this.client.session.messages({ path: { id: context.sessionID } }), null, 2);
+                setInterval(async () => {
+                    console.log(await this.client.session.messages({ path: { id: context.sessionID } }), null, 2);
                 }, 3000);
 
                 try {
