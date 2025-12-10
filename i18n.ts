@@ -25,4 +25,5 @@ export function localize(key: string, ...args: (string | number)[]): string {
 
 export default {
     get confirmationRequired() { return localize('notification.confirmationRequired'); },
+    get pleaseRespond() { return localize('prompt.pleaseRespond'); },
 };

@@ -1,3 +1,4 @@
 {
-  "notification.confirmationRequired": "Confirmação Necessária"
+  "notification.confirmationRequired": "Confirmação Necessária",
+  "prompt.pleaseRespond": "Por favor, responda:"
 }

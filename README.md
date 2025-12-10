@@ -5,6 +5,10 @@
 
 A OpenCode CLI plugin that makes IA Agent require user confirmation before actions are executed. This adds an extra layer of safety and control to automated processes.
 
+## NOTICE
+
+This is a working in progress and still not ready for use. Check the vscode/antigravity version at [SeamlessAgent](https://github.com/jraylan/seamless-agent).
+
 ## Features
 
 - ✅ **Action interception** - Captures IA Agent actions before execution
