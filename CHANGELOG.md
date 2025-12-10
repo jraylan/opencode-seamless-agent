@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.17](https://github.com/jraylan/opencode-seamless-agent/compare/v0.0.16...v0.0.17) (2025-12-10)
+
+
+### Bug Fixes
+
+* Add pooling sleep ([4688122](https://github.com/jraylan/opencode-seamless-agent/commit/46881227de9b6bb1ede7486d7c4d302e75cd4367))
+* Removed log messags and Added message polling ([81d2ca5](https://github.com/jraylan/opencode-seamless-agent/commit/81d2ca5dad4969e80362c800f9836716a92efde5))
+
 ## [0.0.16](https://github.com/jraylan/opencode-seamless-agent/compare/v0.0.15...v0.0.16) (2025-12-10)
 
 
