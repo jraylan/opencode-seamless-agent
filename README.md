@@ -7,7 +7,7 @@ A OpenCode CLI plugin that makes IA Agent require user confirmation before actio
 
 ## NOTICE
 
-This is a working in progress and still not ready for use. Check the vscode/antigravity version at [SeamlessAgent](https://github.com/jraylan/seamless-agent).
+This is a work in progress and still not ready for use. Check the vscode/antigravity version at [SeamlessAgent](https://github.com/jraylan/seamless-agent).
 
 ## Features
 
