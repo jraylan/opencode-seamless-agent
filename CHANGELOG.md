@@ -18,3 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Basic configuration options in opencode.json
 - TypeScript build setup with esbuild
 - NPM publishing configuration with provenance
+
+## [0.0.2] - 2025-12-10
+
+### Fixed
+
+- Fixed metadata files
