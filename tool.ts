@@ -100,37 +100,42 @@ The tool will interactively prompt the user and wait for their response.
         let error = true
 
         try {
-            // Wait for user response via control API
-            const request = await this.client.tui.control.next();
 
-            if (request.error) {
-                return JSON.stringify(RESPONSE_SCHEMA.parse({
-                    responded: false,
-                    response: "",
-                    error: String(request.error),
-                }));
-            }
+            // Subscribe to events
+            const eventsResponse = await this.client.event.subscribe();
 
-            let userResponse: string;
-            const data = (request as { data?: unknown }).data;
-            const response = (request as { response?: Response }).response;
 
-            if (typeof data === 'string') {
-                userResponse = data;
-            } else if (data && typeof data === 'object' && 'body' in data) {
-                userResponse = String((data as { body: unknown }).body) || "";
-            } else if (response) {
-                userResponse = await response.text();
-            } else {
-                userResponse = "";
-            }
+            // Create a promise that resolves when we get the permission response
+            const response = await new Promise<string>(async (resolve, reject) => {
+                // Set timeout for user response
+                const timeout = setTimeout(() => {
+                    reject(new Error("Timeout waiting for user response"));
+                }, 300000); // 5 minutes timeout
 
-            const result = RESPONSE_SCHEMA.parse({
-                responded: !!userResponse,
-                response: userResponse || "",
+                context.abort.addEventListener("abort", () => {
+                    clearTimeout(timeout);
+                    reject(new Error("Request aborted"));
+                });
+
+                try {
+                    for await (const event of eventsResponse.stream) {
+                        if (event.type === "tui.prompt.append") {
+                            clearTimeout(timeout);
+                            resolve(event.properties.text);
+                            break;
+                        }
+                    }
+                } catch (error) {
+                    clearTimeout(timeout);
+                    reject(error);
+                }
             });
 
-            error = false;
+            error = !!response;
+            const result = RESPONSE_SCHEMA.parse({
+                responded: !error,
+                response: response || "",
+            });
             return JSON.stringify(result);
         } catch (error) {
             if (context.abort.aborted) {
