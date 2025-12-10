@@ -1,6 +1,6 @@
 # Seamless Agent
 
-[![npm version](https://img.shields.io/npm/v/opencode-seamless-agente.svg)](https://www.npmjs.com/package/opencode-seamless-agente)
+[![npm version](https://img.shields.io/npm/v/opencode-seamless-agente.svg)](https://www.npmjs.com/package/opencode-seamless-agent)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A OpenCode CLI plugin that makes IA Agent require user confirmation before actions are executed. This adds an extra layer of safety and control to automated processes.
