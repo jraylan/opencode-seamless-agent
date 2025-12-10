@@ -71,7 +71,7 @@ The tool will interactively prompt the user and wait for their response.
                 variant: "warning",
                 duration: 5000,
             }
-        }).then(() => {
+        }).finally(() => {
             setTimeout(() => {
                 if (this.requests.has(requestId)) {
                     this.showNotification(requestId, sessionId, title, question);
