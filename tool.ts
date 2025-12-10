@@ -119,6 +119,8 @@ The tool will interactively prompt the user and wait for their response.
                                 break;
                             }
                         }
+
+                        await new Promise(res => setTimeout(res, 1000)); // Poll every second
                     }
                 } finally {
                     clearTimeout(timeout);
