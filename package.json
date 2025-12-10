@@ -1,6 +1,6 @@
 {
   "name": "opencode-seamless-agent",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "A OpenCode CLI plugin that makes IA Agent requiring user confirmation before actions are executed.",
   "main": "index.ts",
   "author": "jraylan",

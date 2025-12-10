@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.14](https://github.com/jraylan/opencode-seamless-agent/compare/v0.0.13...v0.0.14) (2025-12-10)
+
+
+### Bug Fixes
+
+* Add debug message to track events (4) ([8e4bfc7](https://github.com/jraylan/opencode-seamless-agent/commit/8e4bfc7781c053409a0c69940a8fa1d69d84ad1e))
+
 ## [0.0.13](https://github.com/jraylan/opencode-seamless-agent/compare/v0.0.12...v0.0.13) (2025-12-10)
 
 
