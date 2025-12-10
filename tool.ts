@@ -39,10 +39,16 @@ MANDATORY TOOL.
             }
         });
 
-        // Append the question to the prompt area so user sees it
-        await this.client.tui.appendPrompt({
+        await this.client.session.prompt({
+            path: { id: context.sessionID },
             body: {
-                text: `[${agentLabel}] **${title}**\n\n${args.question}`
+                noReply: true,
+                parts: [
+                    {
+                        type: "text",
+                        text: `[${agentLabel}] **${title}**\n\n${args.question}`
+                    }
+                ]
             }
         });
 
