@@ -10,8 +10,7 @@
     "url": "git+https://github.com/jraylan/opencode-seamless-agent.git"
   },
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "access": "public"
   },
   "bugs": {
     "url": "https://github.com/jraylan/opencode-seamless-agent/issues"
