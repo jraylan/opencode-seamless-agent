@@ -6,7 +6,7 @@ const bundle = JSON.parse(
 );
 
 try {
-    const locale = (process.env.LANG ?? '').split('.')[0]
+    const locale = process.env.LANG?.split('.')?.[0]?.toLowerCase();
     if (locale && locale !== 'en') {
         const localizedBundle = await import(`./lang/nls.${locale}.json`);
         Object.assign(bundle, localizedBundle);
