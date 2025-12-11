@@ -37,6 +37,10 @@ The tool will interactively prompt the user and wait for their response.
     constructor(private client: PluginInput["client"], private $: PluginInput["$"]) { }
 
     clearRequest(requestId: string, wasAborted = false) {
+        if (!this.requests.has(requestId)) {
+            // Already cleared
+            return
+        }
         this.requests.delete(requestId);
         if (wasAborted) {
             this.client.tui.showToast({
