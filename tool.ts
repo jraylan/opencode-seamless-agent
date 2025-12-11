@@ -56,14 +56,14 @@ The tool will interactively prompt the user and wait for their response.
                 title: title,
                 message: question,
                 variant: "warning",
-                duration: 50000,
+                duration: 5000,
             }
         })
         setTimeout(async () => {
             if (this.requests.has(requestId)) {
                 await this.showNotification(requestId, sessionId, title, question);
             }
-        }, 50000);
+        }, 5000);
     }
 
     async execute(args: z.infer<z.ZodObject<AskUserTool["args"]>>, context: ToolContext): Promise<string> {
@@ -127,7 +127,7 @@ The tool will interactively prompt the user and wait for their response.
                 }
             });
 
-            error = !!response;
+            error = !response;
             const result = RESPONSE_SCHEMA.parse({
                 responded: !error,
                 response: response || "",
